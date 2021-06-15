@@ -1,0 +1,29 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:5.2.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+apply plugin: 'java-library'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+shadowJar {
+    archiveBaseName = 'pmsdk'
+    archiveClassifier = 'beta'
+    archiveVersion = '1.0.0'
+    include {
+    }
+}
