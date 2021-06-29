@@ -27,3 +27,7 @@ shadowJar {
     include {
     }
 }
+
+dependencies {
+    compileOnly(files('third/gson-2.8.7.jar'))
+}

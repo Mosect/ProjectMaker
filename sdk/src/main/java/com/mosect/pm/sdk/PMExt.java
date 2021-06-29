@@ -1,8 +1,10 @@
 package com.mosect.pm.sdk;
 
-import com.mosect.pm.sdk.util.TextUtils;
-
-import java.util.Properties;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.zip.ZipFile;
 
 /**
  * Ext
@@ -12,23 +14,83 @@ public abstract class PMExt {
     private String group;
     private String name;
     private String id;
+    private boolean destroyed;
+    private boolean initialed;
+    protected final List<PMAttr> attrs = new ArrayList<>();
+    private boolean attrsChanged;
 
     /**
      * 初始化Ext
      *
-     * @param properties ext配置属性
+     * @param jarFile Ext的jar文件
      */
-    public final void init(Properties properties) throws PMException {
-        id = properties.getProperty("id", null);
-        if (TextUtils.empty(id)) {
-            throw new PMException("Ext id not found", 1);
+    public void init(File jarFile) throws PMException {
+        if (initialed) {
+            throw new IllegalStateException("Repeat initial");
         }
-        group = properties.getProperty("group", null);
-        name = properties.getProperty("name", null);
-        onInit();
+        ZipFile file;
+        try {
+            file = new ZipFile(jarFile);
+        } catch (IOException e) {
+            throw new PMException("Can't open jar file:" + jarFile, e, 1);
+        }
+
+        initialed = true;
     }
 
-    public final void destroy() {
+    /**
+     * 判断是否初始化
+     *
+     * @return true，已经初始化；false，未初始化
+     */
+    public final boolean isInitialed() {
+        return initialed;
+    }
+
+    /**
+     * 销毁Ext
+     */
+    public void destroy() {
+        if (destroyed) return;
+        destroyed = true;
+    }
+
+    /**
+     * 判断是否销毁
+     *
+     * @return true，销毁；false，未销毁
+     */
+    public final boolean isDestroyed() {
+        return destroyed;
+    }
+
+    /**
+     * 清楚缓存标志
+     */
+    public void clearCacheFlags() {
+        attrsChanged = false;
+    }
+
+    /**
+     * 更新属性，如果更改了属性，需要调用{@link #changedAttrs() changedAttrs}
+     */
+    public void updateAttrs() {
+    }
+
+    /**
+     * 如果更改了属性，需要调用此方法
+     */
+    protected void changedAttrs() {
+        attrsChanged = true;
+    }
+
+    /**
+     * 判断属性是否发生更改
+     *
+     * @return true，属性发生更改；false，属性未发生更改
+     */
+    public boolean isAttrsChanged() {
+        return attrsChanged;
     }
 
     /**
@@ -56,8 +118,5 @@ public abstract class PMExt {
      */
     public final String getId() {
         return id;
-    }
-
-    protected void onInit() {
     }
 }

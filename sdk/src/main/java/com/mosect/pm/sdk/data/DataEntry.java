@@ -1,66 +1,76 @@
 package com.mosect.pm.sdk.data;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.mosect.pm.sdk.util.PathUtils;
 
-public abstract class DataEntry {
+import java.util.Arrays;
+import java.util.Objects;
 
-    private DataEntry parent;
-    private String name;
+public class DataEntry {
+
     private String path;
+    private String name;
+    private String[] fragments;
+    private boolean set;
 
-    public DataEntry(DataEntry parent, String name) {
-        this.parent = parent;
+    public DataEntry(String path) {
+        this.path = path;
+        fragments = PathUtils.splitPath(path);
+        name = fragments[fragments.length - 1];
+        set = path.endsWith("/");
+    }
+
+    private DataEntry(String path, String name, String[] fragments, boolean set) {
+        this.path = path;
         this.name = name;
+        this.fragments = fragments;
+        this.set = set;
     }
 
-    /**
-     * 获取父数据集
-     *
-     * @return 父数据集
-     */
+    @Override
+    public int hashCode() {
+        return path.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof DataEntry) {
+            DataEntry other = (DataEntry) o;
+            return Objects.equals(other.path, path);
+        }
+        return false;
+    }
+
     public DataEntry getParent() {
-        return parent;
+        if (fragments.length > 1) {
+            int length = fragments.length;
+            for (int i = 0; i < fragments.length - 1; i++) {
+                length += fragments[i].length();
+            }
+            String pp = path.substring(0, length);
+            String pn = fragments[fragments.length - 1];
+            String[] pfs = Arrays.copyOf(fragments, fragments.length - 1);
+            return new DataEntry(pp, pn, pfs, true);
+        }
+        return null;
     }
 
-    /**
-     * 获取数据集名称
-     *
-     * @return 数据集名称
-     */
+    public int getFragmentCount() {
+        return fragments.length;
+    }
+
+    public String getFragment(int index) {
+        return fragments[index];
+    }
+
+    public String getPath() {
+        return path;
+    }
+
     public String getName() {
         return name;
     }
 
-    /**
-     * 获取路径
-     *
-     * @return 路径
-     */
-    public String getPath() {
-        if (null == path) {
-            StringBuilder builder = new StringBuilder();
-            makePath(builder);
-            path = builder.toString();
-        }
-        return path;
+    public boolean isSet() {
+        return set;
     }
-
-    /**
-     * 构建路径
-     *
-     * @param builder 输出路径
-     */
-    protected void makePath(StringBuilder builder) {
-        if (null != parent) {
-            parent.makePath(builder);
-        }
-        builder.append('/');
-        builder.append(name);
-    }
-
-    public abstract InputStream getInput() throws IOException;
-
-    public abstract OutputStream getOutput() throws IOException;
 }
