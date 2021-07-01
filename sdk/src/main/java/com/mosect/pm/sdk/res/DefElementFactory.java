@@ -12,9 +12,13 @@ public class DefElementFactory implements ElementFactory {
     public Element createElement(String[] args, DataSet dataSet, DataEntry dataEntry) {
         switch (args[0]) {
             case "text":
-                return new TextElement(dataSet, dataEntry, args);
+                return new ElementText(dataSet, dataEntry, args);
             case "json":
-
+                return new ElementJson(dataSet, dataEntry, args);
+            case "properties":
+                return new ElementProperties(dataSet, dataEntry, args);
+            case "xml":
+                return new ElementXml(dataSet, dataEntry, args);
         }
         return null;
     }

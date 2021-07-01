@@ -19,6 +19,9 @@ public abstract class Element {
         this.args = args;
     }
 
+    public void init() throws IOException {
+    }
+
     public String[] getArgs() {
         return args;
     }

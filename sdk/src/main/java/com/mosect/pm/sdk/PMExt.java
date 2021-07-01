@@ -1,41 +1,55 @@
 package com.mosect.pm.sdk;
 
-import java.io.File;
-import java.io.IOException;
+import com.mosect.pm.sdk.res.Resources;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipFile;
 
 /**
  * Ext
  */
 public abstract class PMExt {
 
-    private String group;
-    private String name;
-    private String id;
+    private PMJar jar;
     private boolean destroyed;
     private boolean initialed;
     protected final List<PMAttr> attrs = new ArrayList<>();
     private boolean attrsChanged;
+    private Resources resources;
 
     /**
      * 初始化Ext
      *
-     * @param jarFile Ext的jar文件
+     * @param jar Ext的jar文件
      */
-    public void init(File jarFile) throws PMException {
+    public void init(PMJar jar) throws PMException {
         if (initialed) {
             throw new IllegalStateException("Repeat initial");
         }
-        ZipFile file;
-        try {
-            file = new ZipFile(jarFile);
-        } catch (IOException e) {
-            throw new PMException("Can't open jar file:" + jarFile, e, 1);
-        }
+        this.jar = jar;
+        resources = new Resources(jar.getResources(), "ext-data");
+
+        onInit();
 
         initialed = true;
+    }
+
+    /**
+     * 获取跟资源
+     *
+     * @return 跟资源
+     */
+    public Resources getRootResources() {
+        return jar.getResources();
+    }
+
+    /**
+     * 获取ext资源
+     *
+     * @return 资源
+     */
+    public Resources getResources() {
+        return resources;
     }
 
     /**
@@ -52,6 +66,7 @@ public abstract class PMExt {
      */
     public void destroy() {
         if (destroyed) return;
+        jar.close();
         destroyed = true;
     }
 
@@ -99,7 +114,7 @@ public abstract class PMExt {
      * @return Ext分组
      */
     public final String getGroup() {
-        return group;
+        return jar.getGroup();
     }
 
     /**
@@ -108,7 +123,7 @@ public abstract class PMExt {
      * @return Ext名称
      */
     public final String getName() {
-        return name;
+        return jar.getName();
     }
 
     /**
@@ -117,6 +132,11 @@ public abstract class PMExt {
      * @return Ext ID
      */
     public final String getId() {
-        return id;
+        return jar.getId();
     }
+
+    /**
+     * 初始化
+     */
+    protected abstract void onInit();
 }

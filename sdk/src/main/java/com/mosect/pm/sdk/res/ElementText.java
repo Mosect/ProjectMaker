@@ -9,12 +9,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class TextElement extends Element {
+public class ElementText extends Element {
 
     private String text;
 
-    public TextElement(DataSet dataSet, DataEntry dataEntry, String[] args) {
+    public ElementText(DataSet dataSet, DataEntry dataEntry, String[] args) {
         super(dataSet, dataEntry, args);
+    }
+
+    @Override
+    public void init() throws IOException {
+        read();
     }
 
     public String getText() {
@@ -33,11 +38,13 @@ public class TextElement extends Element {
             while ((len = inputStream.read(buffer)) > 0) {
                 temp.write(buffer, 0, len);
             }
+            String text;
             if (getArgs().length > 1) {
                 text = temp.toString(getArgs()[1]);
             } else {
                 text = temp.toString();
             }
+            setText(text);
         }
     }
 
@@ -46,9 +53,9 @@ public class TextElement extends Element {
         if (TextUtils.notEmpty(text)) {
             byte[] data;
             if (getArgs().length > 1) {
-                data = text.getBytes(getArgs()[1]);
+                data = getText().getBytes(getArgs()[1]);
             } else {
-                data = text.getBytes();
+                data = getText().getBytes();
             }
             outputStream.write(data);
             outputStream.flush();
